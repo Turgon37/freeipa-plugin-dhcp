@@ -28,7 +28,120 @@ And then there's the labor-saving part, the part which I personally find most us
 
 It would, of course, be possible to change the plugin such that `dhcpHost` objects aren't dynamic but rather are generated statically, giving the user the option of creating a `dhcpHost` from an existing host record, then making the `dhcpHost` records editable in the UI in much the same way that DNS records already are. That would be, as the saying goes, a "simple matter of programming."
 
-## Other obvious areas for improvement
+## How to use it
+
+Once you've configured the plugin how you like, either via the IPA command line (start with `ipa help dhcp` and go from there) or via the web GUI, you need to configure an ISC DHCP server to talk to it. Install the server software by doing a 
+
+```
+yum install -y dhcp
+```
+
+to get what you need (assuming you're using Red Hat Enterprise Linux or CentOS; details will differ if you're on Fedora). Once the server is installed, edit the file `/etc/dhcp/dhcpd.conf` and make it look like this:
+
+```
+ldap-server "ipa.example.com";
+ldap-port 389;
+ldap-base-dn "cn=dhcp,dc=example,dc=com";
+ldap-method static;
+ldap-debug-file "/var/log/dhcp-ldap-startup.log";
+```
+
+Obviously the hostname `ipa.example.com` should instead be the hostname of your FreeIPA server, and the base DN suffix `dc=example,dc=com` should instead be your own base DN suffix. But other than that, make your config file look like this; this sets up an anonymous bind to the FreeIPA LDAP server.
+
+To test out the configuration, as root on your DHCP server, run the following command:
+
+```
+dhcpd -d
+```
+
+You should get something like this (with your own MAC and IP address, obviously):
+
+```
+Internet Systems Consortium DHCP Server 4.2.5
+Copyright 2004-2013 Internet Systems Consortium.
+All rights reserved.
+For info, please visit https://www.isc.org/software/dhcp/
+Wrote 0 deleted host decls to leases file.
+Wrote 0 new dynamic host decls to leases file.
+Wrote 0 leases to leases file.
+Listening on LPF/eth0/00:50:56:1e:01:1f/10.30.1.0/24
+Sending on   LPF/eth0/00:50:56:1e:01:1f/10.30.1.0/24
+Sending on   Socket/fallback/fallback-net
+```
+
+If you get any error messages, check your DHCP configuration in FreeIPA and try again. Assuming DHCPd started up correctly, hit control-C to stop it and then check the contents of `/var/log/dhcp-ldap-startup.log`. Modulo some awkward line breaks, this file should look like a dhcpd.conf file, something like this:
+
+```
+authoritative;
+default-lease-time 43200;
+max-lease-time 86400;
+one-lease-per-client on;
+option domain-name-servers ns.la.charlietango.com;
+option domain-name "la.charlietango.com";
+option domain-search "la.charlietango.com", "charlietango.com";
+
+host mac1.la.charlietango.com {
+    hardware ethernet 01:02:03:04:05:06;
+    fixed-address mac1.la.charlietango.com;
+    option host-name "mac1.la.charlietango.com";
+}
+
+subnet 10.30.1.0 netmask 255.255.255.0 {
+    option broadcast-address 10.30.1.255;
+    option subnet-mask 255.255.255.0;
+    option routers 10.30.1.254;
+    pool {
+        range 10.30.1.201 10.30.1.249;
+        allow known-clients;
+        allow unknown-clients;
+        max-lease-time 86400;
+        default-lease-time 43200;
+    }
+}
+```
+
+I've fixed the line breaks and indentation to make it more readable, but other than that, that's what DHCPd generated for me based on the configuration I created in my FreeIPA server. Note that I have one host in FreeIPA that has a MAC address (the obviously bogus `01:02:03:04:05:06`) and an IP address; this was automatically turned into a global DHCP host record. Below that, you see my one DHCP subnet containing its single address pool.
+
+Now, to get this config generated I set my DHCP server's `ldap-method` to `static`. This is great for testing but _not_ for production. See, when `ldap-method` is set to `static` the DHCP server queries the LDAP server _once_ at start-up, downloads the whole tree, converts that tree into a running configuration and then _never talks to the LDAP server again_ until DHCPd is restarted. This stinks because you have to restart DHCPd every time you add a host to the realm! It's better by far to set `ldap-method` to `dynamic`. This tells DHCPd to read its _static_ configuration once at startup, but whenever a request comes in for a lease to query the LDAP server anew. Changes to the LDAP configuration, then, can propagate to the DHCP server(s) without having to restart them.
+
+So for production, make your `dhcpd.conf` look like this:
+
+```
+ldap-server "ipa.example.com";
+ldap-port 389;
+ldap-base-dn "cn=dhcp,dc=example,dc=com";
+ldap-method dynamic;
+ldap-debug-file "/var/log/dhcp-ldap-startup.log";
+```
+
+The `ldap-debug-file` line remains optional. If you leave it in and start up DHCPd, this time you'll get a config that looks like this:
+
+```
+authoritative;
+default-lease-time 43200;
+max-lease-time 86400;
+one-lease-per-client on;
+option domain-name-servers ns.la.charlietango.com;
+option domain-name "la.charlietango.com";
+option domain-search "la.charlietango.com", "charlietango.com";
+
+subnet 10.30.1.0 netmask 255.255.255.0 {
+    option broadcast-address 10.30.1.255;
+    option subnet-mask 255.255.255.0;
+    option routers 10.30.1.254;
+    pool {
+        range 10.30.1.201 10.30.1.249;
+        allow known-clients;
+        allow unknown-clients;
+        max-lease-time 86400;
+        default-lease-time 43200;
+    }
+}
+```
+
+Notice that this looks just the same as before, only the host entry isn't there. DHCPd will query the LDAP server for `dhcpHost` objects every time a DHCP request comes in … which, if you have a big, busy network with a lot of DHCP requests, can put some load on your LDAP server. But this can be addressed with replication, so it's rarely a real issue.
+
+## Areas for improvement
 
 There are some pretty obvious low-hanging fruit that I haven't bothered to pluck.
 
