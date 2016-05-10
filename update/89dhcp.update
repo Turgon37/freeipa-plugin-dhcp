@@ -1,0 +1,49 @@
+# Copyright © 2016 Jeffery Harrell <jefferyharrell@gmail.com>
+# See file 'LICENSE' for use and warranty information.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+dn: cn=dhcp,$SUFFIX
+add: objectClass: top
+add: objectClass: dhcpService
+add: dhcpStatements: authoritative
+add: dhcpStatements: default-lease-time 43200
+add: dhcpStatements: max-lease-time 86400
+add: dhcpStatements: one-lease-per-client on
+
+#### Schema compatibility #####################################################
+
+dn: cn=dhcpHosts,cn=Schema Compatibility,cn=plugins,cn=config
+add: objectClass: top
+add: objectClass: extensibleObject
+add: schema-compat-container-group: cn=hosts,cn=dhcp,$SUFFIX
+add: schema-compat-search-base: cn=computers,cn=accounts,$SUFFIX
+add: schema-compat-search-filter: (&(macAddress=*)(fqdn=*)(objectClass=ipaHost))
+add: schema-compat-entry-rdn: cn=%{fqdn}
+add: schema-compat-entry-attribute: objectClass=dhcpHost
+add: schema-compat-entry-attribute: dhcpHWAddress=ethernet %{macAddress}
+add: schema-compat-entry-attribute: dhcpStatements=fixed-address %{fqdn}
+add: schema-compat-entry-attribute: dhcpOption=host-name "%{fqdn}"
+
+#### Managed permissions ######################################################
+
+dn: cn=DHCP Administrators,cn=privileges,cn=pbac,$SUFFIX
+add: objectClass: top
+add: objectClass: groupofnames
+add: objectClass: nestedgroup
+only: description: DHCP Administrators
+
+###############################################################################
+
+plugin: update_managed_permissions
