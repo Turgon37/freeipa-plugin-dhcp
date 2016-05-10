@@ -4,6 +4,10 @@ This is a rudimentary plugin that adds DHCP functionality to [FreeIPA](http://ww
 
 This plugin can be used in one of two ways. If you want, you can install [ISC DHCP](https://www.isc.org/downloads/dhcp/) on your FreeIPA server itself and let your FreeIPA server act as a DHCP server; this approximately mirrors the way FreeIPA can run ISC BIND and act as a DNS server. Or if you prefer you can run ISC DHCP on another, separate server and point it at your FreeIPA server via an anonymous LDAP binding. Both methods are really exactly the same; the only difference is where you install and run the ISC DHCP software.
 
+## Pictures
+
+<center><a href="http://i.imgur.com/Q0hTeDu.png"><img width="200px" src="http://i.imgur.com/Q0hTeDu.png"></a> <a href="http://i.imgur.com/uczre41.png"><img width="200px" src="http://i.imgur.com/uczre41.png"></a> <a href="http://i.imgur.com/aNAkxwd.png"><img width="200px" img src="http://i.imgur.com/aNAkxwd.png"></a> <a href="http://i.imgur.com/ClkYgzy.png"><img width="200px" img src="http://i.imgur.com/ClkYgzy.png"></a> <a href="http://i.imgur.com/ysmKgXL.png"><img width="200px" img src="http://i.imgur.com/ysmKgXL.png"></a> <a href="http://i.imgur.com/IALwjJU.png"><img width="200px" img src="http://i.imgur.com/IALwjJU.png"></a> <a href="http://i.imgur.com/HeqlaoQ.png"><img width="200px" img src="http://i.imgur.com/HeqlaoQ.png"></a></center>
+
 ## An important caveat
 
 This plugin was built to purpose. It's not a totally general-purpose solution for DHCP integration into FreeIPA. Some major features of ISC DHCP are currently not supported at all by this plugin, including shared networks, classes and DHCP failover. It's not that those features _can't_ be supported; it's just that I don't personally need them right now, so I haven't added them. So it might be better to think of this plugin as a sort of proof of concept, or maybe a reference implementation of the DHCP schema, rather than a piece of finished software for general use.
