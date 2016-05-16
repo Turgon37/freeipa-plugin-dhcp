@@ -503,9 +503,24 @@ define(
         };
 
 
+//// customize_host_ui ////////////////////////////////////////////////////////
+
+
+        exp.customize_host_ui = function() {
+            var adder_dialog = IPA.host.entity_spec.adder_dialog;
+            var fields = adder_dialog.sections[1].fields;
+            var macaddress_field_spec = {
+                $type: 'multivalued',
+                name: 'macaddress'
+            }
+            fields.splice(2, 0, macaddress_field_spec)
+        };
+
+
 //// phases ///////////////////////////////////////////////////////////////////
 
 
+        phases.on('customization', exp.customize_host_ui);
         phases.on('registration', exp.register);
         phases.on('profile', exp.add_menu_items, 20);
 
