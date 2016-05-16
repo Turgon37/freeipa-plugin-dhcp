@@ -499,7 +499,10 @@ define(
         }
 
         exp.add_menu_items = function() {
-            menu.add_item( exp.dhcp_menu_spec, 'network_services' );
+            network_services_item = menu.query({name: 'network_services'});
+            if (network_services_item.length > 0) {
+                menu.add_item( exp.dhcp_menu_spec, 'network_services' );
+            }
         };
 
 
