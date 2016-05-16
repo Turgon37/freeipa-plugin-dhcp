@@ -22,20 +22,6 @@ add: dhcpStatements: default-lease-time 43200
 add: dhcpStatements: max-lease-time 86400
 add: dhcpStatements: one-lease-per-client on
 
-#### Schema compatibility #####################################################
-
-dn: cn=dhcpHosts,cn=Schema Compatibility,cn=plugins,cn=config
-add: objectClass: top
-add: objectClass: extensibleObject
-add: schema-compat-container-group: cn=hosts,cn=dhcp,$SUFFIX
-add: schema-compat-search-base: cn=computers,cn=accounts,$SUFFIX
-add: schema-compat-search-filter: (&(macAddress=*)(fqdn=*)(objectClass=ipaHost))
-add: schema-compat-entry-rdn: cn=%{fqdn}
-add: schema-compat-entry-attribute: objectClass=dhcpHost
-add: schema-compat-entry-attribute: dhcpHWAddress=ethernet %{macAddress}
-add: schema-compat-entry-attribute: dhcpStatements=fixed-address %{fqdn}
-add: schema-compat-entry-attribute: dhcpOption=host-name "%{fqdn}"
-
 #### Managed permissions ######################################################
 
 dn: cn=DHCP Administrators,cn=privileges,cn=pbac,$SUFFIX
