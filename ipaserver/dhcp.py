@@ -21,9 +21,15 @@
 
 
 from ipalib import _, ngettext
-from ipalib import errors
+from ipalib import api, errors, output, Command
 from ipalib.output import Output, Entry, ListOfEntries
-from ipalib.plugins.baseldap import *
+from .baseldap import (
+    LDAPObject,
+    LDAPCreate,
+    LDAPUpdate,
+    LDAPSearch,
+    LDAPDelete,
+    LDAPRetrieve)
 from ipalib.parameters import *
 from ipalib.plugable import Registry
 from ipapython.dn import DN
@@ -1224,7 +1230,7 @@ class dhcphost_del(Command):
 ###############################################################################
 
 
-from ipalib.plugins import host
+from . import host
 
 
 def host_add_dhcphost(self, ldap, dn, entry_attrs, *keys, **options):
