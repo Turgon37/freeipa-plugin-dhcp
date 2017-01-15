@@ -21,7 +21,7 @@
 SCRIPTPATH=$(dirname $(realpath $0))
 SCHEMATA=( 89dhcp.ldif )
 UPDATES=( 89dhcp.update )
-IPALIB_PLUGINS=( dhcp.py )
+IPASERVER_PLUGINS=( dhcp.py )
 UI_PLUGINS=( dhcp )
 
 ###############################################################################
@@ -50,13 +50,13 @@ done
 
 ###############################################################################
 
-IPALIB_DEST=/usr/lib/python2.7/site-packages/ipalib/plugins/
+IPALIB_DEST=/usr/lib/python2.7/site-packages/ipaserver/plugins/
 
 echo ''
-echo 'Installing IPALIB plugins...'
+echo 'Installing IPASERVER plugins...'
 
-for plugin in ${IPALIB_PLUGINS[@]}; do
-    ${INSTALL} -v -o root -g root -m 644 ${SCRIPTPATH}/ipalib/${plugin} ${IPALIB_DEST}
+for plugin in ${IPASERVER_PLUGINS[@]}; do
+    ${INSTALL} -v -o root -g root -m 644 ${SCRIPTPATH}/ipaserver/${plugin} ${IPALIB_DEST}
 done
 
 ###############################################################################
