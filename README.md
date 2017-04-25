@@ -1,5 +1,14 @@
 # IPA-dhcp
 
+:warning: **Don’t use this project it's still in development**
+
+
+
+
+
+
+
+
 This is a rudimentary plugin that adds DHCP functionality to [FreeIPA](http://www.freeipa.org).
 
 This plugin can be used in one of two ways. If you want, you can install [ISC DHCP](https://www.isc.org/downloads/dhcp/) on your FreeIPA server itself and let your FreeIPA server act as a DHCP server; this approximately mirrors the way FreeIPA can run ISC BIND and act as a DNS server. Or if you prefer you can run ISC DHCP on another, separate server and point it at your FreeIPA server via an anonymous LDAP binding. Both methods are really exactly the same; the only difference is where you install and run the ISC DHCP software.
